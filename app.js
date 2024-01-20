@@ -1,72 +1,42 @@
-const express = require('express');
-const app = express();
-const http = require('http')
-const server = http.createServer(app);
-const {Server} = require('socket.io');
-const path = require('path');
-//abosolute path
-app.use(express.static(path.resolve("./public")))
-
-
-const io = new Server(server)
-io.on("connection",(socket)=>{
-    console.log("new user connected",socket.id)
-
-    socket.on("user_joined",(data)=>{
-        const http = require("http");
 const express = require("express");
+const http = require("http");
 const app = express();
-const path = require("path")
-const {Server} = require("socket.io")
-
 const server = http.createServer(app);
+const { Server } = require("socket.io");
+const path = require("path");
+const io = new Server(server);
 
-//Socket.io
-const io = new Server(server)
+var users = [];
 
-//create a connection with io
-io.on("connection",(socket)=>{
-    console.log("A new User connected",socket.id)
-    socket.on("user-message",(data)=>{
-        console.log(data) 
-    })
-})
+//socket server..
 
-
-//set view engine
-app.use(express.static(path.resolve("./public")))
-
-
-app.get("/",(req,res)=>{
-
-    return  res.sendFile("./public/index.html")
-})
-
-
-
-server.listen(3000, () => console.log("Server is running..."));
-console.log(data)
-        //socket.broadcast.emit("user_joined",data)
-        socket.emit("user_joined",data)
-    })
-
-    socket.on("message",(data)=>{
-        console.log(data)
-        socket.broadcast.emit("message",data)
-        socket.emit("message",data)
-    })
-
-})
+io.on("connection", (socket) => {
+  console.log("A new User Connected..", socket.id);
+  
+  socket.on("user_connected", (user) => {
+    console.log(user, " : has joined the chat ");
+    //save in database..
+    //socket.broadcast.emit("user_connected", username); //send to all connected users except sender
+    users.push({ id: socket.id, name: user });
+    io.emit("user", {user:user,time:new Date().toLocaleTimeString()});
+  });
+  
 
 
 
 
-app.get("/",(req,res)=>{
+  socket.on("user_message", (message) => {
+    console.log(message);
+    //socket.broadcast.emit("user_message",message);
+    io.emit("user_message", message);
+  });
+});
 
-    return res.sendFile("index.html")
-
-})
+app.use(express.static(path.resolve("./public")));
+app.get("/", (req, res) => {
+  return res.sendFile("index.html");
+});
 
 server.listen(3000, () => {
-    console.log('Server running on port 3000');
-})
+  console.log("listening on *:3000");
+});
