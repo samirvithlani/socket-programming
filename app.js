@@ -18,7 +18,8 @@ io.on("connection", (socket) => {
     //save in database..
     //socket.broadcast.emit("user_connected", username); //send to all connected users except sender
     users.push({ id: socket.id, name: user });
-    io.emit("user", {user:user,time:new Date().toLocaleTimeString()});
+   io.emit("user", {user:user,time:new Date().toLocaleTimeString()});
+   //socket.broadcast.emit("user", {user:user,time:new Date().toLocaleTimeString()});
   });
   
 
